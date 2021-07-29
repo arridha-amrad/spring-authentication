@@ -1,5 +1,6 @@
 package com.arridhaamrad.authentication.models.entities;
 
+import com.arridhaamrad.authentication.models.AuditModel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,8 +12,7 @@ import java.util.Set;
 @Table(name = "tbl_users")
 @Getter
 @Setter
-public class UserEntity {
-
+public class UserEntity extends AuditModel {
    @Id
    @GeneratedValue(strategy = GenerationType.IDENTITY)
    private Long id;

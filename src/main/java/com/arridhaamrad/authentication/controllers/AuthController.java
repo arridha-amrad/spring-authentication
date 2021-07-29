@@ -53,6 +53,7 @@ public class AuthController {
       }
 
       Set<RoleEntity> roles = new HashSet<>();
+
       ResponseData<UserEntity> responseDta = new ResponseData<>();
 
       if(signupRequestData.getRoles().size() == 0){
