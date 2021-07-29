@@ -1,5 +1,6 @@
 package com.arridhaamrad.authentication.services;
 
+import com.arridhaamrad.authentication.exceptions.ResourceNotFoundException;
 import com.arridhaamrad.authentication.models.entities.UserEntity;
 import com.arridhaamrad.authentication.models.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +41,9 @@ public class UserServices implements UserDetailsService {
    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
       UserDetails userDetails;
       if (username.contains("@")){
-         userDetails = userRepository.findByEmail(username).orElseThrow(() -> new RuntimeException("User not found"));
+         userDetails = userRepository.findByEmail(username).orElseThrow(() -> new ResourceNotFoundException("User not found"));
       } else {
-         userDetails = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+         userDetails = userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("User not found"));
       }
       return userDetails;
    }

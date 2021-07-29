@@ -1,10 +1,12 @@
 package com.arridhaamrad.authentication.controllers;
 
+import com.arridhaamrad.authentication.dto.exceptions.CustomResponse;
 import com.arridhaamrad.authentication.dto.requests.LoginRequestData;
 import com.arridhaamrad.authentication.dto.responses.BadRequestResponse;
 import com.arridhaamrad.authentication.dto.responses.JwtResponse;
 import com.arridhaamrad.authentication.dto.responses.ResponseData;
 import com.arridhaamrad.authentication.dto.requests.SignupRequestData;
+import com.arridhaamrad.authentication.exceptions.LoginFailedException;
 import com.arridhaamrad.authentication.models.entities.RoleEntity;
 import com.arridhaamrad.authentication.models.entities.UserEntity;
 import com.arridhaamrad.authentication.models.enums.RoleEnum;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -53,17 +56,13 @@ public class AuthController {
       return "Hello World";
    }
 
-   @PostMapping
+   @PostMapping("/register")
    public ResponseEntity<?> register(
         @Valid @RequestBody SignupRequestData signupRequestData,
         Errors errors
    ){
       if (errors.hasErrors()){
-         BadRequestResponse badRequestResponse = new BadRequestResponse();
-         for (ObjectError error: errors.getAllErrors()){
-            badRequestResponse.getMessages().add(error.getDefaultMessage());
-         }
-         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(badRequestResponse);
+         return CustomResponse.badRequestResponse(errors);
       }
 
       Set<RoleEntity> roles = new HashSet<>();
@@ -110,12 +109,17 @@ public class AuthController {
          }
          return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(badRequestResponse);
       }
-      Authentication authentication = authenticationManager.authenticate(
-          new UsernamePasswordAuthenticationToken(
-              loginData.getUsername(),
-              loginData.getPassword()
-          )
-      );
+      Authentication authentication;
+      try {
+         authentication = authenticationManager.authenticate(
+              new UsernamePasswordAuthenticationToken(
+                   loginData.getUsername(),
+                   loginData.getPassword()
+              )
+         );
+      } catch (BadCredentialsException e){
+         throw new LoginFailedException("invalid username/email and password");
+      }
       SecurityContextHolder.getContext().setAuthentication(authentication);
       UserEntity userEntity = (UserEntity) authentication.getPrincipal();
       // generate token
