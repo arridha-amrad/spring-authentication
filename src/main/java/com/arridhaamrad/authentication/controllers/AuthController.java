@@ -1,5 +1,6 @@
 package com.arridhaamrad.authentication.controllers;
 
+import com.arridhaamrad.authentication.dto.responses.BadRequestResponse;
 import com.arridhaamrad.authentication.dto.responses.ResponseData;
 import com.arridhaamrad.authentication.dto.requests.SignupRequestData;
 import com.arridhaamrad.authentication.models.entities.RoleEntity;
@@ -11,6 +12,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -37,10 +40,21 @@ public class AuthController {
    }
 
    @PostMapping
-   public ResponseEntity<ResponseData<UserEntity>> register(@Valid @RequestBody SignupRequestData signupRequestData){
-      System.out.println("enum : " + RoleEnum.ROLE_USER); // ROLE_USER
+   public ResponseEntity<?> register(
+        @Valid @RequestBody SignupRequestData signupRequestData,
+        Errors errors
+   ){
+      if (errors.hasErrors()){
+         BadRequestResponse badRequestResponse = new BadRequestResponse();
+         for (ObjectError error: errors.getAllErrors()){
+            badRequestResponse.getMessages().add(error.getDefaultMessage());
+         }
+         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(badRequestResponse);
+      }
+
       Set<RoleEntity> roles = new HashSet<>();
       ResponseData<UserEntity> responseDta = new ResponseData<>();
+
       if(signupRequestData.getRoles().size() == 0){
          RoleEntity role = roleService.findByName(RoleEnum.ROLE_USER).get();
          roles.add(role);
