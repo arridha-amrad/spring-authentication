@@ -3,6 +3,9 @@ package com.arridhaamrad.authentication.services;
 import com.arridhaamrad.authentication.models.entities.UserEntity;
 import com.arridhaamrad.authentication.models.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +15,7 @@ import java.util.Optional;
 
 @Service
 @Transactional
-public class UserServices {
+public class UserServices implements UserDetailsService {
 
    @Autowired
    BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -31,5 +34,16 @@ public class UserServices {
 
    public Optional<UserEntity> findByUsername(String username){
       return userRepository.findByUsername(username);
+   }
+
+   @Override
+   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+      UserDetails userDetails;
+      if (username.contains("@")){
+         userDetails = userRepository.findByEmail(username).orElseThrow(() -> new RuntimeException("User not found"));
+      } else {
+         userDetails = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+      }
+      return userDetails;
    }
 }

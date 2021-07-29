@@ -6,4 +6,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: "update"
-
+  app:
+    name: "authentication with spring by arridhaamrad"
+    jwt-secret: "ari_ganteng"
+    jwt-expiration-ms: 10000
