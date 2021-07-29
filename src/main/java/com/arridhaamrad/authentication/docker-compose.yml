@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  mysql:
+    container_name: "mysql"
+    image: mysql
+    restart: always
+    volumes:
+      - spring-mysql-data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    networks:
+      - spring-network
+    ports:
+      - 3306:3306
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - 8081:80
+    environment:
+      - PMA_ARBITRARY=1
+    networks:
+      - spring-network
+volumes:
+  spring-mysql-data:
+networks:
+  spring-network:
